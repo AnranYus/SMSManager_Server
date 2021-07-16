@@ -22,5 +22,6 @@
     <orderEntry type="library" scope="PROVIDED" name="Tomcat 9.0.45" level="application_server_libraries" />
     <orderEntry type="library" name="com.google.code.gson:gson:2.8.7" level="project" />
     <orderEntry type="library" name="org.java-websocket:Java-WebSocket:1.5.1" level="project" />
+    <orderEntry type="library" name="Java EE 6-Java EE 6" level="project" />
   </component>
 </module>

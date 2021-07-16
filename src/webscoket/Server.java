@@ -60,6 +60,7 @@ public class Server extends WebSocketServer {
         }
         if(content.getType().equals("getSMS")){
             //收到短信 推送到控制端
+            System.out.println("StartGetSMS");
             getSMS(webSocket,content);
 
         }
@@ -86,22 +87,46 @@ public class Server extends WebSocketServer {
     }
 
     private void getSMS(WebSocket webSocket,Content content){
-        String recipientUUID = content.getRecipientUUID();
-        for (int i = 0 ;i<=ConsoleList.size();i++){
-            if (i==ConsoleList.size()){
-                //没有设备
-                Content content1 = new Content("未找到目标设备","reply","null",content.getSenderUUID(),"server");
-                webSocket.send(gson.toJson(content1));
-                break;
-            }
-            if (ConsoleList.get(i).getConsoleUUID().equals(recipientUUID)){
-                ConsoleList.get(i).getWebSocketConsole().send(gson.toJson(content));
+        System.out.println("In GetSMS");
+        int i = 0;
+        for(Console console : ConsoleList){
+            i++;
+            if (console.getConsoleUUID().equals(content.getRecipientUUID())){
+                System.out.println("PushStart");
+                console.getWebSocketConsole().send(gson.toJson(content));
                 //回报
                 Content content1 = new Content("推送成功","reply","null",content.getSenderUUID(),"server");
                 webSocket.send(gson.toJson(content1));
-                break;
+                System.out.println("PushEnd");
+                i=0;
             }
+            break;
         }
+        if (i==ConsoleList.size()){
+            Content content1 = new Content("未找到设备","reply","null",content.getSenderUUID(),"server");
+            webSocket.send(gson.toJson(content1));
+            System.out.println("没有设备");
+        }
+
+
+
+
+//        for (int i = 0 ;i<=ConsoleList.size();i++){
+//            System.out.println(i);
+////            if (i==ConsoleList.size()){
+////                //没有设备
+////                Content content1 = new Content("未找到目标设备","reply","null",content.getSenderUUID(),"server");
+////                webSocket.send(gson.toJson(content1));
+////                break;
+////            }
+//            if (ConsoleList.get(i).getConsoleUUID().equals(recipientUUID)){
+//
+//                break;
+//            }else {
+//                System.out.println("Null");
+//            }
+//            System.out.println("end");
+//        }
     }
 
     private void sendSMS(WebSocket webSocket, Content content) {
@@ -147,7 +172,6 @@ public class Server extends WebSocketServer {
             console.setWebSocketConsole(webSocket);
             ConsoleList.add(console);
             for (Client client: ClientList){
-                //TODO 客户端的绑定判定存在问题
                 if (client.getClientUUID().equals(console.getBindUUID())){
                     Content consoleToClient = new Content();
                     consoleToClient.setType("bindConsole");
@@ -185,10 +209,5 @@ public class Server extends WebSocketServer {
         System.out.println("Server Start");
     }
 
-    public static void main(String[] args) {
-        Server s = new Server(new InetSocketAddress("0.0.0.0",8899));
-        s.run();
-        System.out.println("Start server");
-    }
 
 }
