@@ -99,34 +99,15 @@ public class Server extends WebSocketServer {
                 webSocket.send(gson.toJson(content1));
                 System.out.println("PushEnd");
                 i=0;
+                break;
             }
-            break;
+
         }
         if (i==ConsoleList.size()){
             Content content1 = new Content("未找到设备","reply","null",content.getSenderUUID(),"server");
             webSocket.send(gson.toJson(content1));
             System.out.println("没有设备");
         }
-
-
-
-
-//        for (int i = 0 ;i<=ConsoleList.size();i++){
-//            System.out.println(i);
-////            if (i==ConsoleList.size()){
-////                //没有设备
-////                Content content1 = new Content("未找到目标设备","reply","null",content.getSenderUUID(),"server");
-////                webSocket.send(gson.toJson(content1));
-////                break;
-////            }
-//            if (ConsoleList.get(i).getConsoleUUID().equals(recipientUUID)){
-//
-//                break;
-//            }else {
-//                System.out.println("Null");
-//            }
-//            System.out.println("end");
-//        }
     }
 
     private void sendSMS(WebSocket webSocket, Content content) {
@@ -182,10 +163,11 @@ public class Server extends WebSocketServer {
                     String json = gson.toJson(consoleToClient);
                     client.getWebSocketClient().send(json);
                     System.out.println("bind");
+                    break;
                 }else {
                     System.out.println("not found");
                 }
-                break;
+
             }
 
 
