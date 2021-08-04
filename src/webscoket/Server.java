@@ -58,6 +58,9 @@ public class Server extends WebSocketServer {
             //发送短信操作
             sendSMS(webSocket,content);
         }
+        if (content.getType().equals("bind")){
+            bind(content);
+        }
         if(content.getType().equals("getSMS")){
             //收到短信 推送到控制端
             System.out.println("StartGetSMS");
@@ -126,9 +129,26 @@ public class Server extends WebSocketServer {
                 //回报
                 Content content1 = new Content("发送成功","reply","null",content.getSenderUUID(),"server");
                 webSocket.send(gson.toJson(content1));
-                break;
+
             }
 
+        }
+    }
+
+    private void bind(Content content){
+        for (Client client: ClientList){
+            if (client.getClientUUID().equals(content.getRecipientUUID())){
+                Content consoleToClient = new Content();
+                consoleToClient.setType("bindConsole");
+                consoleToClient.setSenderUUID(content.getRecipientUUID());
+                consoleToClient.setRecipientUUID(client.getClientUUID());
+                consoleToClient.setOrigin("console");
+                consoleToClient.setContent(content.getRecipientUUID());
+                String json = gson.toJson(consoleToClient);
+                client.getWebSocketClient().send(json);
+                System.out.println("bind");
+
+            }
         }
     }
 
@@ -138,7 +158,12 @@ public class Server extends WebSocketServer {
         connOrigin = content.getOrigin();
         //检查发起连接请求的客户端类型
         if (content.getOrigin().equals("client")) {
-            System.out.println("client");
+            for (int i = 0; i < ClientList.size(); i++) {
+                if (ClientList.get(i).getClientUUID().equals(connUUID)){
+                    ClientList.remove(i);
+                }
+            }
+
             Client client = new Client();
             client.setWebSocketClient(webSocket);
             client.setClientUUID(content.getSenderUUID());
@@ -146,12 +171,20 @@ public class Server extends WebSocketServer {
 
 
         }else if(content.getOrigin().equals("console")){
-            System.out.println("console");
+
+            for (int i = 0; i < ConsoleList.size(); i++) {
+                if (ConsoleList.get(i).getConsoleUUID().equals(connUUID)){
+                    ConsoleList.remove(i);
+                }
+            }
+
             Console console = new Console();
             console.setConsoleUUID(content.getSenderUUID());
             console.setBindUUID(content.getRecipientUUID());
             console.setWebSocketConsole(webSocket);
             ConsoleList.add(console);
+            //TODO -解决(? 剥离控制端的绑定和连接功能
+            /**
             for (Client client: ClientList){
                 if (client.getClientUUID().equals(console.getBindUUID())){
                     Content consoleToClient = new Content();
@@ -163,12 +196,13 @@ public class Server extends WebSocketServer {
                     String json = gson.toJson(consoleToClient);
                     client.getWebSocketClient().send(json);
                     System.out.println("bind");
-                    break;
+
                 }else {
-                    System.out.println("not found");
+                    System.out.println("Not bind");
                 }
 
             }
+             */
 
 
 
